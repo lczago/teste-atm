@@ -47,7 +47,7 @@ func validaValorSaque(valorParametro string) (int, string) {
 	if valor < 20 {
 		return 0, "Valor do saque deve ser igual ou superior a R$20"
 	} else if valor%10 == 3 || valor%10 == 1 {
-		return 0, "Valor do saque não pode terminar com valor 1 ou 3. Obs: Cedular de 1 real estão fora de circulação"
+		return 0, "Valor do saque não pode terminar com valor 1 ou 3. Obs: Cédula de 1 real esta fora de circulação"
 	}
 	return valor, ""
 }
