@@ -1,21 +1,20 @@
 package controller
 
-import "strconv"
+import (
+	"atm-teste/erro"
+	"strconv"
+)
 
-type warn struct {
-	Error string `json:"error"`
-}
-
-// Valores das notas reais em circulação.
+// Constante dos valores das notas reais em circulação.
 var NotasReais = []int{200, 100, 50, 20, 10, 5, 2}
 
 func Saque(valorParametro string) interface{} {
 	valorSaque, err := validaValorSaque(valorParametro)
 	if err != "" {
-		return warn{err}
+		return erro.Warn{err}
 	}
 
-	quantidadeNotas := map[int]int{2: 0, 5: 0, 10: 0, 20: 0, 50: 0, 100: 0, 200: 0} // "Valor da nota": "Quantidade"
+	quantidadeNotas := map[int]int{2: 0, 5: 0, 10: 0, 20: 0, 50: 0, 100: 0, 200: 0} // Map: "Valor da nota": "Quantidade"
 	calculaQuantidadeNotas(0, valorSaque, &quantidadeNotas)
 	return quantidadeNotas
 }
@@ -27,10 +26,13 @@ func calculaQuantidadeNotas(indiceNota int, valorSaque int, quantidadeNota *map[
 	}
 
 	valorNota := NotasReais[indiceNota]
-	if valorSaque >= valorNota && valorNota+1 != valorSaque && valorNota+3 != valorSaque {
-		quantidade := valorSaque / valorNota
-		(*quantidadeNota)[valorNota] += quantidade
-		valorSaque -= valorNota * quantidade
+
+	for valorSaque >= valorNota {
+		if valorSaque-valorNota == 1 || valorSaque-valorNota == 3 {
+			break
+		}
+		(*quantidadeNota)[valorNota]++
+		valorSaque -= valorNota
 	}
 
 	indiceNota++
@@ -44,10 +46,10 @@ func validaValorSaque(valorParametro string) (int, string) {
 		return 0, "Apenas são aceitos número inteiros!"
 	}
 
-	if valor < 20 {
-		return 0, "Valor do saque deve ser igual ou superior a R$20"
-	} else if valor%10 == 3 || valor%10 == 1 {
-		return 0, "Valor do saque não pode terminar com valor 1 ou 3. Obs: Cédula de 1 real esta fora de circulação"
+	if valor <= 0 {
+		return 0, "Valor do saque não pode ser zero ou negativo!"
+	} else if valor == 3 || valor == 1 {
+		return 0, "Valor a ser sacado não pode ser 1 ou 3."
 	}
 	return valor, ""
 }
